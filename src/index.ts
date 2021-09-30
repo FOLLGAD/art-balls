@@ -3,20 +3,46 @@ import P5 from "p5";
 
 interface Point {
   dir: number;
+  startdir: number;
   color: Color.Color;
   position: [number, number];
   thickness: number;
   seed: number;
 }
 
+const setups = [
+  {
+    // Spinplosion
+    pointMult: -1,
+    cosper: 0,
+    sinper: 0,
+    dirSlowness: 5,
+  },
+  {
+    // Random
+    pointMult: 0,
+    cosper: 0,
+    sinper: 0,
+    dirSlowness: 1,
+  },
+  {
+    // uniform out
+    pointMult: -1,
+    cosper: Math.PI / 2,
+    sinper: Math.PI / 2,
+    dirSlowness: 10000,
+  },
+];
+const setup = setups[0];
+
 const TAU = Math.PI * 2;
 const spread = 100;
 const numberOfPoints = 3000;
-const dirSlowness = 1;
+const dirSlowness = setup.dirSlowness;
 const thicknessSlowness = 2;
 const thickness = 20;
 const gaussianColorDiff = false;
-const colorVariance = 20;
+const colorVariance = 30;
 
 const s = (p5: P5) => {
   const points: Point[] = [];
@@ -25,22 +51,27 @@ const s = (p5: P5) => {
     let canvas = p5.createCanvas(p5.windowWidth, p5.windowHeight);
     p5.background("#eeeeee");
 
-    const getPoint = (): [number, number] => {
-      const theta = Math.random() * TAU;
+    const getPoint = (theta?: number): [number, number] => {
+      theta ||= Math.random() * TAU;
       const r = spread * p5.sqrt(Math.random());
       return [
-        p5.width / 2 + Math.cos(theta) * r,
-        p5.height / 2 + Math.sin(theta) * r,
+        p5.width / 2 + Math.sin(theta + setup.sinper) * r,
+        p5.height / 2 + Math.cos(theta + setup.cosper) * r,
       ];
     };
     const noise = p5.random(0, 360);
 
     for (let i = 0; i < numberOfPoints; i++) {
       const seed = p5.random(0, 10e5);
+      const startdir = Math.random() * TAU;
+      const pos = getPoint(-startdir * setup.pointMult);
+      const m = p5.noise(seed, 0 / 8000 / dirSlowness);
+      const dir = m * m * Math.PI * 2 * 8 + startdir;
       const p: Point = {
-        dir: 0,
+        startdir: dir,
+        dir: dir,
         thickness: 0,
-        position: getPoint(),
+        position: pos,
         color: Color.hsl(
           (noise +
             (gaussianColorDiff
@@ -71,12 +102,8 @@ const s = (p5: P5) => {
       let prevpx = p.position[0],
         prevpy = p.position[1];
 
-      p.dir =
-        p5.noise(p.seed, p5.millis() / 8000 / dirSlowness) *
-        p5.noise(p.seed) *
-        Math.PI *
-        2 *
-        8;
+      const m = p5.noise(p.seed, p5.millis() / 8000 / dirSlowness);
+      p.dir = m * m * Math.PI * 2 * 8 - p.startdir;
       p.position[0] += Math.cos(p.dir);
       p.position[1] += Math.sin(p.dir);
 
