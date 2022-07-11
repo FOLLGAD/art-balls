@@ -33,7 +33,7 @@ const setups = [
     dirSlowness: 10000,
   },
 ];
-const setup = setups[0];
+const setup = setups[2];
 
 const TAU = Math.PI * 2;
 const spread = 100;
