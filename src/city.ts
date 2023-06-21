@@ -9,14 +9,15 @@ p5.setup = function setup() {
 
 let t = 0
 
+let a = Math.random() * 100000
+
 p5.draw = function draw() {
+  p5.randomSeed(a)
   t+=p5.deltaTime
-  p5.randomSeed(100)
   
   p5.translate(p5.width/2, p5.height/2);
   
-  p5.rotate(p5.PI / 40 * p5.sin(t/4000))
-    p5.ellipseMode
+  p5.rotate(p5.PI / 40 * p5.sin(t/250))
   p5.translate(-150, 0)
   
   p5.background("antiquewhite");
@@ -39,7 +40,7 @@ p5.draw = function draw() {
     p5.rotate(p5.atan2(y2-y1, x2-x1))
     p5.strokeWeight(p5.random(1, 8))
     p5.stroke(p5.random(360), p5.random(50, 100), p5.random(50, 100))
-    //strokeCap(SQUARE)
+    p5.strokeCap(p5.SQUARE)
     let len = 
         //random(100)
         p5.random(p5.log(1 + (p5.abs(rand-0.5)))*200 + p5.random(5, 10)) +
